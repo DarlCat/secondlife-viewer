@@ -78,7 +78,6 @@ public:
     bool getFirstClickInteract() const { return mFirstClickInteract; }
     U16 getWidthPixels() const { return mWidthPixels; }
     U16 getHeightPixels() const { return mHeightPixels; }
-    bool getTransparentBackground() const { return mTransparentBackground; }
 
     // "security" fields
     bool getWhiteListEnable() const { return mWhiteListEnable; }
@@ -101,7 +100,6 @@ public:
     U32 setAutoScale(bool auto_scale) { mAutoScale = auto_scale; return LSL_STATUS_OK; }
     U32 setAutoZoom(bool auto_zoom) { mAutoZoom = auto_zoom; return LSL_STATUS_OK; }
     U32 setFirstClickInteract(bool first_click) { mFirstClickInteract = first_click; return LSL_STATUS_OK; }
-    U32 setTransparentBackground(bool transparent) { mTransparentBackground = transparent; return LSL_STATUS_OK; }
     U32 setWidthPixels(U16 width);
     U32 setHeightPixels(U16 height);
 
@@ -140,7 +138,6 @@ public:
     static const char*  FIRST_CLICK_INTERACT_KEY;
     static const char*  WIDTH_PIXELS_KEY;
     static const char*  HEIGHT_PIXELS_KEY;
-    static const char*  TRANSPARENT_BACKGROUND_KEY;
 
     // "security" fields
     static const char*  WHITELIST_ENABLE_KEY;
@@ -171,8 +168,7 @@ public:
          WHITELIST_ID = 12,
          PERMS_INTERACT_ID = 13,
          PERMS_CONTROL_ID = 14,
-         TRANSPARENT_BACKGROUND_ID = 15,
-         PARAM_MAX_ID = TRANSPARENT_BACKGROUND_ID
+         PARAM_MAX_ID = PERMS_CONTROL_ID
     };
 
     // "permissions" values
@@ -208,7 +204,6 @@ private:
     bool mAutoScale;
     bool mAutoZoom;
     bool mFirstClickInteract;
-    bool mTransparentBackground;
     U16 mWidthPixels;
     U16 mHeightPixels;
 

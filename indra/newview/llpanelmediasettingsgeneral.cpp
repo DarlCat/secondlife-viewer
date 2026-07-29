@@ -67,7 +67,6 @@ LLPanelMediaSettingsGeneral::LLPanelMediaSettingsGeneral() :
     mAutoZoom( NULL ),
     mAutoPlay( NULL ),
     mAutoScale( NULL ),
-    mTransparentBackground( NULL ),
     mWidthPixels( NULL ),
     mHeightPixels( NULL ),
     mHomeURL( NULL ),
@@ -88,7 +87,6 @@ bool LLPanelMediaSettingsGeneral::postBuild()
     mAutoPlay = getChild< LLCheckBoxCtrl >( LLMediaEntry::AUTO_PLAY_KEY );
     mAutoScale = getChild< LLCheckBoxCtrl >( LLMediaEntry::AUTO_SCALE_KEY );
     mAutoZoom = getChild< LLCheckBoxCtrl >( LLMediaEntry::AUTO_ZOOM_KEY );
-    mTransparentBackground = getChild< LLCheckBoxCtrl >( LLMediaEntry::TRANSPARENT_BACKGROUND_KEY );
     mCurrentURL = getChild< LLTextBox >( LLMediaEntry::CURRENT_URL_KEY );
     mFirstClick = getChild< LLCheckBoxCtrl >( LLMediaEntry::FIRST_CLICK_INTERACT_KEY );
     mHeightPixels = getChild< LLSpinCtrl >( LLMediaEntry::HEIGHT_PIXELS_KEY );
@@ -206,7 +204,6 @@ void LLPanelMediaSettingsGeneral::clearValues( void* userdata, bool editable, bo
     self->mHeightPixels->clear();
     self->mHomeURL->clear();
     self->mWidthPixels->clear();
-    self->mTransparentBackground->clear();
     self->mAutoLoop ->setEnabled(editable);
     self->mAutoPlay ->setEnabled(editable);
     self->mAutoScale ->setEnabled(editable);
@@ -216,7 +213,6 @@ void LLPanelMediaSettingsGeneral::clearValues( void* userdata, bool editable, bo
     self->mHeightPixels ->setEnabled(editable);
     self->mHomeURL ->setEnabled(editable);
     self->mWidthPixels ->setEnabled(editable);
-    self->mTransparentBackground ->setEnabled(editable);
     if (update_preview)
     {
         self->updateMediaPreview();
@@ -281,7 +277,6 @@ void LLPanelMediaSettingsGeneral::initValues( void* userdata, const LLSD& _media
         { LLMediaEntry::HOME_URL_KEY,               self->mHomeURL,         "LLLineEditor" },
         { LLMediaEntry::FIRST_CLICK_INTERACT_KEY,   self->mFirstClick,      "LLCheckBoxCtrl" },
         { LLMediaEntry::WIDTH_PIXELS_KEY,           self->mWidthPixels,     "LLSpinCtrl" },
-        { LLMediaEntry::TRANSPARENT_BACKGROUND_KEY, self->mTransparentBackground, "LLCheckBoxCtrl" },
         { "", NULL , "" }
     };
 
@@ -419,7 +414,6 @@ void LLPanelMediaSettingsGeneral::getValues( LLSD &fill_me_in, bool include_tent
             fill_me_in[LLMediaEntry::HOME_URL_KEY] = (LLSD::String)mHomeURL->getValue();
     if (include_tentative || !mFirstClick->getTentative()) fill_me_in[LLMediaEntry::FIRST_CLICK_INTERACT_KEY] = (LLSD::Boolean)mFirstClick->getValue();
     if (include_tentative || !mWidthPixels->getTentative()) fill_me_in[LLMediaEntry::WIDTH_PIXELS_KEY] = (LLSD::Integer)mWidthPixels->getValue();
-    if (include_tentative || !mTransparentBackground->getTentative()) fill_me_in[LLMediaEntry::TRANSPARENT_BACKGROUND_KEY] = (LLSD::Boolean)mTransparentBackground->getValue();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

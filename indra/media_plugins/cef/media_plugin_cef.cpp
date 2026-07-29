@@ -653,7 +653,8 @@ void MediaPluginCEF::receiveMessage(const char* message_string)
 
                 // SL-15560: Product team overruled my change to set the default
                 // embedded background color to match the floater background
-                // and set it to white
+                // and set it to white. MOAP uses a transparent white background
+                // so empty/unpainted page areas can show through on prim faces.
                 settings.background_color = mTransparentBackground ? 0x00ffffff : 0xffffffff;
 
                 settings.root_cache_path = mRootCachePath;

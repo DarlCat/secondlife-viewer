@@ -323,23 +323,11 @@ viewer_media_t LLViewerMedia::updateMediaImpl(LLMediaEntry* media_entry, const s
         media_impl->mMediaHeight = media_entry->getHeightPixels();
         media_impl->mMediaAutoPlay = media_entry->getAutoPlay();
         media_impl->mMediaEntryURL = media_entry->getCurrentURL();
-        bool transparent_bg_changed = (media_impl->mTransparentBackground != media_entry->getTransparentBackground());
-        media_impl->mTransparentBackground = media_entry->getTransparentBackground();
         if (media_impl->mMediaSource)
         {
             media_impl->mMediaSource->setAutoScale(media_impl->mMediaAutoScale);
             media_impl->mMediaSource->setLoop(media_impl->mMediaLoop);
             media_impl->mMediaSource->setSize(media_entry->getWidthPixels(), media_entry->getHeightPixels());
-            if (transparent_bg_changed)
-            {
-                // CEF transparent mode is init only, reload to take effect.
-                std::string current_url = media_impl->mMediaEntryURL;
-                media_impl->destroyMediaSource();
-                if (!current_url.empty())
-                {
-                    media_impl->navigateTo(current_url, "", false, false);
-                }
-            }
         }
 
         bool url_changed = (media_impl->mMediaEntryURL != previous_url);
@@ -381,7 +369,6 @@ viewer_media_t LLViewerMedia::updateMediaImpl(LLMediaEntry* media_entry, const s
         media_impl->setHomeURL(media_entry->getHomeURL());
         media_impl->mMediaAutoPlay = media_entry->getAutoPlay();
         media_impl->mMediaEntryURL = media_entry->getCurrentURL();
-        media_impl->mTransparentBackground = media_entry->getTransparentBackground();
         if(media_impl->isAutoPlayable())
         {
             needs_navigate = true;
@@ -1670,7 +1657,6 @@ LLViewerMediaImpl::LLViewerMediaImpl(     const LLUUID& texture_id,
     mTrustedBrowser(false),
     mZoomFactor(1.0),
     mCleanBrowser(false),
-    mTransparentBackground(false),
     mMimeProbe(),
     mCanceling(false)
 {
@@ -1891,6 +1877,8 @@ LLPluginClassMedia* LLViewerMediaImpl::newSourceFromMediaType(std::string media_
             media_source->proxy_setup(gSavedSettings.getBOOL("BrowserProxyEnabled"), gSavedSettings.getString("BrowserProxyAddress"), gSavedSettings.getS32("BrowserProxyPort"));
 
             media_source->setTarget(target);
+
+            // Must be set before init(): CEF background color is applied at browser creation.
             media_source->setTransparentBackground(transparent_background);
 
             const std::string plugin_dir = gDirUtilp->getLLPluginDir();
@@ -1953,7 +1941,10 @@ bool LLViewerMediaImpl::initializePlugin(const std::string& media_type)
     // Save the MIME type that really caused the plugin to load
     mCurrentMimeType = mMimeType;
 
-    LLPluginClassMedia* media_source = newSourceFromMediaType(mMimeType, this, mMediaWidth, mMediaHeight, mZoomFactor, mTarget, mCleanBrowser, mTransparentBackground);
+    // MOAP (world prim faces / HUDs) gets a transparent CEF background so unpainted
+    // page pixels can alpha-blend. UI browsers and parcel media stay opaque white.
+    const bool transparent_background = !mUsedInUI && !mIsParcelMedia;
+    LLPluginClassMedia* media_source = newSourceFromMediaType(mMimeType, this, mMediaWidth, mMediaHeight, mZoomFactor, mTarget, mCleanBrowser, transparent_background);
 
     if (media_source)
     {
@@ -3228,9 +3219,13 @@ LLViewerMediaTexture* LLViewerMediaImpl::updateMediaImage()
         // MEDIAOPT: seems insane that we actually have to make an imageraw then
         // immediately discard it
         LLPointer<LLImageRaw> raw = new LLImageRaw(texture_width, texture_height, texture_depth);
-        // Clear the texture to the background color with alpha.
+        // Clear the texture to the background color with opaque alpha so the
+        // surface is solid (white by default) until the first media frame
+        // arrives. CEF/page transparency replaces these pixels when content is
+        // painted; using 0 alpha here made every media surface (including XUI
+        // browsers) appear fully transparent on init.
         // convert background color channels from [0.0, 1.0] to [0, 255];
-        raw->clear(int(mBackgroundColor.mV[VX] * 255.0f), int(mBackgroundColor.mV[VY] * 255.0f), int(mBackgroundColor.mV[VZ] * 255.0f), 0x00);
+        raw->clear(int(mBackgroundColor.mV[VX] * 255.0f), int(mBackgroundColor.mV[VY] * 255.0f), int(mBackgroundColor.mV[VZ] * 255.0f), 0xff);
 
         // ask media source for correct GL image format constants
         media_tex->setExplicitFormat(mMediaSource->getTextureFormatInternal(),

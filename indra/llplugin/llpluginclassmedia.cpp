@@ -236,10 +236,12 @@ void LLPluginClassMedia::idle(void)
             {
                 void *addr = mPlugin->getSharedMemoryAddress(mTextureSharedMemoryName);
 
-                // clear texture memory to avoid random screen visual fuzz from uninitialized texture data
+                // Fill with opaque white (0xFF per channel works for RGB and BGRA)
+                // so the surface is solid until the plugin paints real frames.
+                // Zeroing made RGBA media (CEF) fully transparent on init.
                 if (addr)
                 {
-                    memset( addr, 0x00, newsize );
+                    memset( addr, 0xFF, newsize );
                 }
                 else
                 {
